@@ -76,8 +76,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(userData);
         router.push('/');
       }
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Login gagal. Periksa kembali email dan password Anda.';
+    } catch (error: unknown) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const err = error as any;
+      const errorMsg = err.response?.data?.message || 'Login gagal. Periksa kembali email dan password Anda.';
       throw new Error(errorMsg);
     }
   };

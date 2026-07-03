@@ -59,8 +59,8 @@ export default function EditKaryawanPage({ params }: EditKaryawanProps) {
             status_aktif: !!data.status_aktif,
           });
         }
-      } catch (err: any) {
-        console.error(err);
+      } catch (error: unknown) {
+        console.error(error);
         setGlobalError('Gagal mengambil data karyawan. Karyawan tidak ditemukan.');
       } finally {
         setFetching(false);
@@ -101,12 +101,14 @@ export default function EditKaryawanPage({ params }: EditKaryawanProps) {
           router.push('/');
         }, 1500);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      if (error.response && error.response.status === 422) {
-        setErrors(error.response.data.errors || {});
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const err = error as any;
+      if (err.response && err.response.status === 422) {
+        setErrors(err.response.data.errors || {});
       } else {
-        setGlobalError(error.response?.data?.message || 'Gagal memperbarui data karyawan. Silakan coba lagi.');
+        setGlobalError(err.response?.data?.message || 'Gagal memperbarui data karyawan. Silakan coba lagi.');
       }
       setSubmitting(false);
     }

@@ -18,7 +18,9 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-    } catch (err: any) {
+    } catch (error: unknown) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const err = error as any;
       setError(err.message || 'Login gagal. Periksa kembali koneksi atau kredensial Anda.');
       setSubmitting(false);
     }

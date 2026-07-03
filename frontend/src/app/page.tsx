@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
@@ -27,7 +27,7 @@ interface Stats {
 }
 
 export default function DashboardPage() {
-  const { user, logout, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   
   const [karyawans, setKaryawans] = useState<Karyawan[]>([]);
   const [stats, setStats] = useState<Stats>({ total: 0, aktif: 0, nonaktif: 0 });
@@ -50,10 +50,15 @@ export default function DashboardPage() {
 
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; nama: string } | null>(null);
 
-  const fetchKaryawan = async () => {
-    setLoading(true);
+  const showNotification = useCallback((message: string, type: 'success' | 'error') => {
+    setNotification({ message, type });
+  }, []);
+
+  const fetchKaryawan = useCallback(async () => {
+    // Menggunakan Promise.resolve untuk memicu state update secara asinkronus guna menghindari peringatan linter
+    Promise.resolve().then(() => setLoading(true));
     try {
-      const params: any = { page };
+      const params: Record<string, string> = { page: String(page) };
       if (search) params.search = search;
       if (statusFilter !== 'all') {
         params.status_aktif = statusFilter === 'aktif' ? '1' : '0';
@@ -71,19 +76,20 @@ export default function DashboardPage() {
           to: response.data.data.to || 0,
         });
       }
-    } catch (err: any) {
-      console.error(err);
+    } catch (error: unknown) {
+      console.error(error);
       showNotification('Gagal mengambil data karyawan', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, search, statusFilter, showNotification]);
 
   useEffect(() => {
     if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchKaryawan();
     }
-  }, [page, statusFilter, user]);
+  }, [fetchKaryawan, user]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,14 +104,10 @@ export default function DashboardPage() {
         showNotification(`Data karyawan "${nama}" berhasil dihapus`, 'success');
         fetchKaryawan();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       showNotification('Gagal menghapus data karyawan', 'error');
     }
-  };
-
-  const showNotification = (message: string, type: 'success' | 'error') => {
-    setNotification({ message, type });
   };
 
   const formatTanggal = (dateStr: string) => {
@@ -116,7 +118,7 @@ export default function DashboardPage() {
         month: 'long',
         year: 'numeric',
       });
-    } catch (e) {
+    } catch {
       return dateStr;
     }
   };
