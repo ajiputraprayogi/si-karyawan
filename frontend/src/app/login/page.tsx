@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import styles from './login.module.css';
 
@@ -118,6 +119,13 @@ export default function LoginPage() {
             {submitting ? 'Menghubungkan...' : 'Masuk'}
           </button>
         </form>
+
+        <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+          Belum punya akun?{' '}
+          <Link href="/register" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>
+            Daftar di sini
+          </Link>
+        </div>
       </div>
     </div>
   );

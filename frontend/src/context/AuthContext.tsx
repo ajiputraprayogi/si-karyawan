@@ -14,6 +14,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, password_confirmation: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -56,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!loading) {
       const token = localStorage.getItem('access_token');
-      const isPublicRoute = pathname === '/login';
+      const isPublicRoute = pathname === '/login' || pathname === '/register';
 
       if (!token && !isPublicRoute) {
         router.push('/login');
@@ -84,6 +85,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const register = async (name: string, email: string, password: string, password_confirmation: string) => {
+    try {
+      await api.post('/register', { name, email, password, password_confirmation });
+    } catch (error: unknown) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const err = error as any;
+      const errorMsg = err.response?.data?.message || 'Registrasi gagal. Silakan coba lagi.';
+      throw new Error(errorMsg);
+    }
+  };
+
   const logout = async () => {
     try {
       await api.post('/logout');
@@ -98,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\KaryawanController;
 
 // Route Publik
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
 
 // Route Terproteksi (Sanctum)
 Route::middleware('auth:sanctum')->group(function () {
