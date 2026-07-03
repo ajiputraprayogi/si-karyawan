@@ -173,4 +173,40 @@ class KaryawanApiTest extends TestCase
         $response->assertStatus(200);
         $this->assertDatabaseMissing('karyawans', ['id' => $karyawan->id]);
     }
+
+    public function test_registration_successful(): void
+    {
+        $response = $this->postJson('/api/register', [
+            'name' => 'New User',
+            'email' => 'newuser@test.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJson([
+                'status' => 'success',
+                'message' => 'Registrasi berhasil. Silakan login.',
+            ])
+            ->assertJsonStructure([
+                'status',
+                'message',
+                'user' => ['id', 'name', 'email']
+            ]);
+
+        $this->assertDatabaseHas('users', ['email' => 'newuser@test.com']);
+    }
+
+    public function test_registration_fails_due_to_validation(): void
+    {
+        $response = $this->postJson('/api/register', [
+            'name' => 'New User',
+            'email' => 'newuser@test.com',
+            'password' => 'password123',
+            'password_confirmation' => 'different_password',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['password']);
+    }
 }
